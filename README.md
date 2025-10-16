@@ -54,10 +54,19 @@ Feature tracking in computer vision involves detecting distinctive points (featu
   - Tracks features to second image
   - Outputs feature locations and performance metrics
   - Generates visualization files (PPM format)
-
+- **Performance**: 0.065 seconds, 92/100 features tracked
+  
 ### V2 - Naive GPU Implementation
-- **Status**: 🔄 Planned
-- **Description**: Direct port of CPU code to GPU using basic CUDA
+- **Status**: ✅ Complete
+- **Description**: Direct CUDA port of KLT core algorithms
+- **Features**:
+  - GPU kernels for gradient computation, feature detection, and tracking
+  - Host-side feature selection (top 100)
+  - Single-scale Lucas-Kanade tracking
+  - No pyramids, shared memory, or advanced optimizations
+- **Performance**: 0.034 seconds, 100/100 features tracked
+- **Speedup**: ~1.9× over V1
+- **Test Images**: img0.pgm and img1.pgm (320×240)
 
 ### V3 - Optimized GPU Implementation  
 - **Status**: 🔄 Planned
@@ -104,18 +113,39 @@ Feature tracking in computer vision involves detecting distinctive points (featu
    ./klt_app
    ```
 
+### V2 Setup and Compilation
+
+1. **Navigate to V2 directory**:
+   ```bash
+   cd src/V2
+   ```
+
+2. **Build the application**:
+   ```bash
+   make
+   ```
+
+3. **Run the application**:
+   ```bash
+   ./v2_klt ../../data/img0.pgm ../../data/img1.pgm
+   ```
+
+4. **Output files**:
+   - `features_frame0_gpu.txt` and `features_frame0_gpu.ppm`
+   - `features_frame1_gpu.txt` and `features_frame1_gpu.ppm`
+
 ### Available Make Targets (V1)
 
-| Target | Description |
-|--------|-------------|
-| `all` | Build library and main application |
-| `lib` | Build KLT library only |
-| `klt_app.exe` | Build main application |
-| `examples` | Build all example applications |
-| `profile` | Run with profiling enabled |
-| `benchmark` | Run performance benchmark |
-| `clean` | Remove generated files |
-| `help` | Show available targets |
+| Target        | Description                        |
+|---------------|------------------------------------|
+| `all`         | Build library and main application |
+| `lib`         | Build KLT library only             |
+| `klt_app.exe` | Build main application             |
+| `examples`    | Build all example applications     |
+| `profile`     | Run with profiling enabled         |
+| `benchmark`   | Run performance benchmark          |
+| `clean`       | Remove generated files             |
+| `help`        | Show available targets             |
 
 ## Input Data
 
@@ -126,30 +156,53 @@ The project uses a sequence of PGM (Portable GrayMap) format images:
 
 ## Output Files
 
-V1 generates the following output files:
+**V1 Output**:
 - `features_frame0.ppm` - Visual representation of detected features
 - `features_frame0.txt` - Text file with feature coordinates
 - `features_frame1.ppm` - Visual representation of tracked features  
 - `features_frame1.txt` - Text file with tracked feature coordinates
 
+**V2 Output**:
+- `features_frame0_gpu.ppm` - Visual representation of detected features (GPU)
+- `features_frame0_gpu.txt` - Text file with feature coordinates (GPU)
+- `features_frame1_gpu.ppm` - Visual representation of tracked features (GPU)
+- `features_frame1_gpu.txt` - Text file with tracked feature coordinates (GPU)
+
+  
 ## Performance Metrics (V1 Baseline)
 
-**Test Configuration**: 320x240 images, 100 features
-- **Processing Time**: ~1.15 seconds
+### V1 Baseline (CPU)
+**Test Configuration**: 320x240 images (img0.pgm, img1.pgm), 100 features
+- **Processing Time**: 0.065 seconds
 - **Features Detected**: 100
 - **Successfully Tracked**: 92 (92% success rate)
 - **Lost Features**: 8
-- **Throughput**: ~87 features/second
+- **Throughput**: ~1,415 features/second
 
+### V2 Naive GPU
+**Test Configuration**: 320×240 images (img0.pgm, img1.pgm), 100 features
+- **Processing Time**: 0.034 seconds
+- **Features Detected**: 100
+- **Successfully Tracked**: 100 (100% success rate)
+- **Lost Features**: 0
+- **Throughput**: ~2,949 features/second
+- **Speedup**: ~1.9× over V1
+- **Note**: Better tracking due to FP precision differences in GPU gradient computations
+
+  
 ## Project Timeline & Deliverables
 
-| Deliverable | Deadline | Status |
-|-------------|----------|--------|
-| CCP-D1 | Oct 6, 2025 | ✅ V1 Complete |
-| CCP-D2 | Oct 17, 2025 | 🔄 V2 Development |
-| CCP-D3 | Oct 31, 2025 | 🔄 V3 Development |
-| CCP-D4 | Nov 14, 2025 | 🔄 V4 Development |
-| CCP-D5 | Final Week | 🔄 Final Presentation |
+| Deliverable | Deadline      | Status                |
+|-------------|---------------|-----------------------|
+| CCP-D1      | Oct 6, 2025   | ✅ V1 Complete        |
+| CCP-D2      | Oct 17, 2025  | ✅ V2 Complete        |
+| CCP-D3      | Oct 31, 2025  | 🔄 V3 Development     |
+| CCP-D4      | Nov 14, 2025  | 🔄 V4 Development     |
+| CCP-D5      | Final Week    | 🔄 Final Presentation |
+
+## Contributing
+V1 done by Nabeeha Mahmood 23i-0588
+V2 done by Maham Fatima    23i-0685
 
 ## Course Learning Objectives (CLOs)
 
@@ -157,14 +210,6 @@ This project addresses:
 - **CLO2**: Application profiling and hotspot identification
 - **CLO3**: Data-parallel solution development using CUDA
 - **CLO4**: Performance analysis and optimization on HPC systems
-
-## Contributing
-
-Each team member should:
-1. Make regular commits to document individual contributions
-2. Keep the GitHub repository private
-3. Clearly document which parts were individual contributions
-4. Follow the established directory structure
 
 ## References
 
@@ -179,4 +224,4 @@ This project is for educational purposes as part of CS 4110. The original KLT co
 
 ---
 
-**Note**: This is the V1 implementation. GPU-accelerated versions (V2-V4) will be developed in subsequent phases of the project.
+**Note**: This is the V1 and V2 implementation. V3-V4 will be developed in subsequent phases of the project.
